@@ -1,0 +1,88 @@
+<script src="//cdnjs.cloudflare.com/ajax/libs/p5.js/0.5.7/p5.js"></script>
+<script type="text/javascript">
+function setup() {
+   createCanvas(600, 600);
+   angleMode(DEGREES);
+ }
+
+ function draw() {
+   background(21);
+   translate(height/2, width/2);
+  var s = map(second(), 0, 60, 0, 360);
+  var m = map(minute() + norm(second(), 0, 60), 0, 60, 0, 360); 
+  var h = map(hour() + norm(minute(), 0, 60), 0, 24, 0, TWO_PI * 2) - HALF_PI;
+  var c = map(mouseX, 0, 600, 0, 100);
+   
+   push();
+   strokeWeight(8);
+   stroke(150, 100, 255);
+   rotate(180);
+   line(0, 0, 0, 50);
+   pop();
+   push();
+   let he = 150;
+   noFill();
+   rotate(45);
+   rotate(-s);
+   strokeWeight(8);
+   stroke(150, 100, 255);
+   rect(-he/2, -he/2, he, he);
+   push();
+   rotate(-135);
+   drawHourScale();
+   pop();
+   pop();
+ }
+  
+  function drawHourScale() {
+	push();
+
+	// Draw 12 lines as hour scale
+
+	for (var i = 0; i < 12; i++) {
+		stroke(150, 100, 255);
+		strokeWeight(8);
+		//line(clockRadius, 0, clockRadius - clockRadius / 8, 0);
+
+		rotate(30);
+
+		//if (displayHourScaleLabels) {
+			push();
+
+			// Draw scale labels
+
+			translate(130, 0);
+			rotate(-30 * (i + 1) + 90);
+
+			fill(21);
+			noStroke();
+			textSize(23);
+			textAlign(CENTER, CENTER);
+			text(i + 1, 0, 0);
+      if(i==2){
+        fill(150, 100, 255);
+			text(3, 0, 0);
+      }
+      if(i==5){
+        fill(150, 100, 255);
+			text(6, 0, 0);
+      }
+      if(i==8){
+        fill(150, 100, 255);
+			text(9, 0, 0);
+      }
+      if(i==11){
+        fill(150, 100, 255);
+			text(12, 0, 0);
+      }
+			pop();
+		}
+	//}
+
+	pop();
+}
+  
+ function mousePressed(){
+  c = map(mouseX, 0, 600, 0, 100); //debug
+}
+</script>
