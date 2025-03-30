@@ -1,88 +1,229 @@
-<script src="//cdnjs.cloudflare.com/ajax/libs/p5.js/0.5.7/p5.js"></script>
-<script type="text/javascript">
 function setup() {
-   createCanvas(600, 600);
-   angleMode(DEGREES);
- }
-
- function draw() {
-   background(21);
-   translate(height/2, width/2);
-  var s = map(second(), 0, 60, 0, 360);
-  var m = map(minute() + norm(second(), 0, 60), 0, 60, 0, 360); 
-  var h = map(hour() + norm(minute(), 0, 60), 0, 24, 0, TWO_PI * 2) - HALF_PI;
-  var c = map(mouseX, 0, 600, 0, 100);
-   
-   push();
-   strokeWeight(8);
-   stroke(150, 100, 255);
-   rotate(180);
-   line(0, 0, 0, 50);
-   pop();
-   push();
-   let he = 150;
-   noFill();
-   rotate(45);
-   rotate(-s);
-   strokeWeight(8);
-   stroke(150, 100, 255);
-   rect(-he/2, -he/2, he, he);
-   push();
-   rotate(-135);
-   drawHourScale();
-   pop();
-   pop();
- }
-  
-  function drawHourScale() {
-	push();
-
-	// Draw 12 lines as hour scale
-
-	for (var i = 0; i < 12; i++) {
-		stroke(150, 100, 255);
-		strokeWeight(8);
-		//line(clockRadius, 0, clockRadius - clockRadius / 8, 0);
-
-		rotate(30);
-
-		//if (displayHourScaleLabels) {
-			push();
-
-			// Draw scale labels
-
-			translate(130, 0);
-			rotate(-30 * (i + 1) + 90);
-
-			fill(21);
-			noStroke();
-			textSize(23);
-			textAlign(CENTER, CENTER);
-			text(i + 1, 0, 0);
-      if(i==2){
-        fill(150, 100, 255);
-			text(3, 0, 0);
-      }
-      if(i==5){
-        fill(150, 100, 255);
-			text(6, 0, 0);
-      }
-      if(i==8){
-        fill(150, 100, 255);
-			text(9, 0, 0);
-      }
-      if(i==11){
-        fill(150, 100, 255);
-			text(12, 0, 0);
-      }
-			pop();
-		}
-	//}
-
-	pop();
+  angleMode(DEGREES)
+  frameRate(60)
 }
+
+let smallestDimesnsion, date, miliSeconds, seconds, minutes, hours;
+
+function draw() {
+  date = new Date();
+  // Adding previous element after floating point will yield smooth movement when used as an angle
+  miliSeconds = date.getMilliseconds();
+  seconds = date.getSeconds() + miliSeconds / 1000;
+  minutes = date.getMinutes() + seconds / 60;
+  hours = date.getHours() + minutes / 60;
+
+  createCanvas(windowWidth, windowHeight);
+  translate(windowWidth / 2, windowHeight / 2);
+  background(21);
+
+  if (windowHeight < windowWidth) {
+    smallestDimension = windowHeight;
+  } else {
+    smallestDimension = windowWidth;
+  }
   
- function mousePressed(){
-  c = map(mouseX, 0, 600, 0, 100); //debug
+  let secondAngle = map(seconds, 0, 60, 1, 359);
+  let minuteAngle = map(minutes, 0, 60, 1, 359);
+  let hourAngle = map(hours % 12, 0, 12, 1, 359);
+
+  drawHoursDialO(2.4, 20, hourAngle);
+  drawMinutesDialO(3, 15, minuteAngle);
+  drawSecondsDialO(3.5, 10, secondAngle);
+  //drawDial(2.4, 20, "teal", 49.1, 90, 3, 3.5, hourAngle)
+  //drawDial(3, 15, "dodgerblue", 78, 30, 5, 3.3, minuteAngle)
+  //drawDial(3.5, 10, "teal", smallestDimension/3.5, 6, 1, 2.7, secondAngle)
+  drawHand(0.28);
 }
-</script>
+
+function drawHand(scale) {
+  push();
+  noStroke();
+  fill("red");
+  scale = smallestDimension * scale;
+  quad(-5, 0, 0, 5, 5, 0, 0, -1 * scale);
+  pop();
+}
+
+function drawDial(radius, markerLength, markerColour, markerThicknessFactor, markerFrequencyFactor, textIncrement, textOffset, angle) {
+  push()
+  radius = smallestDimension / radius;
+  rotate(-angle)
+  stroke(markerColour)
+  strokeWeight(radius/markerThicknessFactor)
+  angleMode(DEGREES)
+  let text = 0
+  for (let i = 0; i < 360; ++i) {
+    let interm = i - 90; // so that 0 is at top
+    let x = radius * cos(interm);
+    let y = radius * sin(interm);
+    let x1 = (radius + markerLength) * cos(interm);
+    let y1 = (radius + markerLength) * sin(interm);
+    let x2 = (radius + markerLength * textOffset) * cos(interm);
+    let y2 = (radius + markerLength * textOffset) * sin(interm);
+    
+    if(i % markerFrequencyFactor == 0) {
+      drawDialText()
+      text+=textIncrement
+      line(x, y, x1, y1);
+    }
+  }
+  pop()
+}
+
+function drawDialText() {
+  
+}
+
+function drawSecondsDialO(radius, markerLength, angle) {
+  push();
+  radius = smallestDimension / radius;
+  rotate(-angle);
+  stroke("teal");
+  strokeWeight(1);
+  angleMode(DEGREES);
+  let sec = 0;
+  for (let i = 0; i < 360; ++i) {
+    let interm = i - 90; // so that 0 is at top
+    let x = radius * cos(interm);
+    let y = radius * sin(interm);
+    let x1 = (radius + markerLength) * cos(interm);
+    let y1 = (radius + markerLength) * sin(interm);
+    let x2 = (radius + markerLength * 2.7) * cos(interm);
+    let y2 = (radius + markerLength * 2.7) * sin(interm);
+
+    if (i % 6 == 0) {
+      drawSecondsText(sec, x2, y2, angle, radius);
+      sec++;
+      line(x, y, x1, y1);
+    }
+  }
+  pop();
+}
+
+function drawMinutesDialO(radius, markerLength, angle) {
+  push();
+  radius = smallestDimension / radius;
+  rotate(-angle);
+  stroke("dodgerblue");
+  strokeWeight(radius / 78);
+  angleMode(DEGREES);
+  let min = 0;
+  for (let i = 0; i < 360; ++i) {
+    let interm = i - 90; // so that 0 is at top
+    let x = radius * cos(interm);
+    let y = radius * sin(interm);
+    let x1 = (radius + markerLength) * cos(interm);
+    let y1 = (radius + markerLength) * sin(interm);
+    let x2 = (radius + markerLength * 3.3) * cos(interm);
+    let y2 = (radius + markerLength * 3.3) * sin(interm);
+
+    if (i % 30 == 0) {
+      drawMinutesText(min, x2, y2, angle, radius);
+      min += 5;
+      line(x, y, x1, y1);
+    }
+  }
+  pop();
+}
+
+function drawHoursDialO(radius, markerLength, angle) {
+  push();
+  radius = smallestDimension / radius;
+  rotate(-angle);
+  stroke("teal");
+  strokeWeight(radius / 49.1);
+  angleMode(DEGREES);
+  let hour = 0;
+  for (let i = 0; i < 360; ++i) {
+    let interm = i - 90; // so that 0 is at top
+    let x = radius * cos(interm);
+    let y = radius * sin(interm);
+    let x1 = (radius + markerLength) * cos(interm);
+    let y1 = (radius + markerLength) * sin(interm);
+    let x2 = (radius + markerLength * 3.5) * cos(interm);
+    let y2 = (radius + markerLength * 3.5) * sin(interm);
+
+    if (i % 90 == 0) {
+      drawHoursText(hour, x2, y2, angle, radius);
+      hour += 3;
+      line(x, y, x1, y1);
+    }
+  }
+  drawBezel(radius * 2.2);
+  pop();
+}
+
+function drawSecondsText(second, x, y, angle, scale) {
+  push();
+  scale = scale / 15;
+  if (second == 0) {
+    angle = 0;
+    second = "▼";
+  }
+  translate(x, y);
+  rotate(angle);
+  fill("orangered");
+  noStroke();
+  textSize(scale);
+  textAlign(CENTER, CENTER);
+  text(second, 0, 0);
+  pop();
+}
+
+function drawMinutesText(minute, x, y, angle, scale) {
+  push();
+  scale = scale / 10;
+  if (minute == 0) {
+    angle = 0;
+    minute = "▼";
+  }
+  translate(x, y);
+  rotate(angle);
+  fill("orange");
+  noStroke();
+  textSize(scale);
+  textAlign(CENTER, CENTER);
+  text(minute, 0, 0);
+  pop();
+}
+
+function drawHoursText(hour, x, y, angle, scale) {
+  push();
+  scale = scale / 7;
+  switch (hour) {
+    case 3:
+      hour = "III";
+      break;
+    case 6:
+      hour = "VI";
+      break;
+    case 9:
+      hour = "IX";
+      break;
+    case 0:
+      hour = "XII";
+      scale *= 1.5
+      break;
+  }
+  translate(x, y);
+  rotate(angle);
+  fill("magenta");
+  noStroke();
+  textSize(scale);
+  textAlign(CENTER, CENTER);
+  text(hour, 0, 0);
+  pop();
+}
+
+function drawBezel(radius) {
+  push();
+  noFill();
+  strokeWeight(radius / 54);
+  stroke("midnightblue");
+  arc(0, 0, radius, radius, 10, 80);
+  arc(0, 0, radius, radius, 100, 170);
+  arc(0, 0, radius, radius, 190, 260);
+  arc(0, 0, radius, radius, 280, 350);
+  pop();
+}
